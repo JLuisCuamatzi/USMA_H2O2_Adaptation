@@ -31,21 +31,11 @@ The <b>Figure 3</b> of the main manuscript can be found in `02_MappingAndCoverag
 
 See the `03_SNP_Calling` subdirectory
 
-### Analysis of sequenced pools
-
-See the `04_Pools_analysis` subdirectory
-
-The <b>Figure 4</b> of the main manuscript can be found in `04_Pools_analysis/Figure_Variants.Pools.png`
-
-### Analysis of chromosomal duplications in <i>U. maydis</i> isolates
-
-See the `05_Duplications_in_Umaydis_isolates` subdirectory
-
 ### Analysis of data collected from experimental evolution, analysis of gene expression of UMAG_11067 and phenotypic analysis of oexUMAG_11067 (strain that overexpress UMAG_11067 gene)
 
-See the subdirectory `06_USMA_ExpEvol_Data`
+See the subdirectory `04_Assays_USMA_Growth_qPCR_Infection`
 
-The <b>Figures 1</b>, <b>2</b>, <b>5</b>, <b>6</b>, and <b>7</b> of the main manuscript can be found in `06_USMA_ExpEvol_Data/Figures/`
+
 
 
 
