@@ -111,7 +111,7 @@ plot.oex.mutant <- ggplot() +
                      guide = "axis_minor") +
   scale_x_discrete(labels = c("SG200" = "<i>U. maydis</i> SG200<br> <br>Initial Strain",
                               "oexCAT" = "oex<br> <br>UMAG_11067",
-                              "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>.R<br> <br>Treatment 20"))+
+                              "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+
   scale_fill_manual(values = wes_palette("Cavalcanti1")) +
   scale_color_manual(values = wes_palette("Cavalcanti1"))+
   labs(y = "Surviving Cells", x = "\nStrain")+
@@ -255,7 +255,7 @@ plot.infection <- ggplot() +
                fill = Symptom), alpha = 0.9, col = "black", width = 0.9) +
   scale_x_discrete(labels = c("SG200" = "<i>U. maydis</i><br> <br>SG200", 
                               "oexCAT" = "oex<br> <br>UMAG_11067", 
-                              "LC.1" = "UmH<sub>2</sub>O<sub>2</sub>.R<br> <br>Treatment 20")) +
+                              "LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain")) +
   scale_y_continuous(labels = scales::percent, expand = c(0,0),
                      breaks = seq(0, 1, 0.2),
                      minor_breaks = seq(0, 1, 0.1),

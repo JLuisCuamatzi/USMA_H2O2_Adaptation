@@ -77,7 +77,7 @@ Figure.2 <- ggplot()+
                      guide = "axis_minor",
                      expand = c(0,0))+
   scale_x_discrete(labels = c("SG200" = "<i>U. maydis</i> SG200<br> <br>Initial Strain", 
-                              "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>.R <br> <br>Treatment 20"))+
+                              "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R <br> <br>Adapted Strain"))+
   labs(x = "Strain", y = "Fold Change in Catalase Gene Expression")+
   ## colors
   scale_fill_manual(values = c( 

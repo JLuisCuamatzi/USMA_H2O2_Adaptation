@@ -60,7 +60,7 @@ df.Figure.1 <- df.Figure.1 %>%
             CFU_5mM = CFU[H2O2 == "5mM"],
             CFU_60mM = CFU[H2O2 == "60mM"]) %>% 
   ungroup()
-df.Figure.1
+
 # estimate the percentage of cfu 
 # we calculate 5 and 60 mM against 0 mM in each group 
 df.Figure.1 <- df.Figure.1 %>% 
@@ -150,7 +150,7 @@ plot.Figure.1 <- df2plot.1 %>%
   #                               "<i>U. maydis</i> SG200<br> <br>H<sub>2</sub>O<sub>2</sub> Resistant <br> <br>(UmH<sub>2</sub>O<sub>2</sub>.R)"))+
   scale_x_discrete(labels = c("U. maydis SG200" = "<i>U. maydis</i> SG200<br> <br>Initial Strain",
                               "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
-                                "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>H<sub>2</sub>O<sub>2</sub> Resistant"))+
+                                "UmH<sub>2</sub>O<sub>2</sub>.R<br> <br>Adapted Strain"))+
 
   theme_classic() +
   
