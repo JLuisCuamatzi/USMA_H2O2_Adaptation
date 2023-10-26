@@ -20,7 +20,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
 # Read file with data of gene expression
-df.qpcr <- read_excel(path = "UMAG_11067_qPCR.xlsx", sheet = "Fold_Change") # read the file
+df.qpcr <- read_excel(path = "Figure2/Data_2_UMAG_11067_qPCR.xlsx", sheet = "Fold_Change") # read the file
 df.qpcr <- setDT(df.qpcr) # transform to data table
 
 
@@ -76,7 +76,7 @@ Figure.2 <- ggplot()+
                      minor_breaks = seq(0, 4, 0.25),
                      guide = "axis_minor",
                      expand = c(0,0))+
-  scale_x_discrete(labels = c("SG200" = "<i>U. maydis</i> SG200<br> <br>Initial Strain", 
+  scale_x_discrete(labels = c("SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain', 
                               "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R <br> <br>Adapted Strain"))+
   labs(x = "Strain", y = "Fold Change in Catalase Gene Expression")+
   ## colors
@@ -112,13 +112,10 @@ Figure.2 <- ggplot()+
     ggh4x.axis.ticks.length.minor = rel(1)) +
   stat_pvalue_manual(data = stat.test, label = "label"); Figure.2
 
-plot.Figure2 <- paste0("Fig.2.png")
+plot.Figure2 <- paste0("Figure2/Figure_2.tiff")
 
 ggsave(filename = plot.Figure2, plot = Figure.2,
-       width = 7, height = 9, units = "cm", dpi = 300, bg = "white")
-
-
-
+       width = 7, height = 9, units = "cm", dpi = 300, bg = "white", device = "tiff")
 
 
 rm(list = ls())

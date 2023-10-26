@@ -22,14 +22,9 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # clean the env
 rm(list = ls())
 
-# Define color palette for SG200, T20.LB1, and T20.LC.1
-color.sg <- "black"
-color.lb <- "#7F6000"
-color.lc <- "#C55A11"
-
 ## plot oexcat
 # Read file with data of CFU in oexUMAG_11067
-df.oex <- fread("UMAG_11067_oex_Mutant.csv")
+df.oex <- fread("Figure3/Data_3_UMAG_11067_oex_Mutant.csv")
 
 df.oex.mean <- df.oex %>% 
   group_by(Strain, H2O2) %>% 
@@ -41,7 +36,7 @@ df.oex.mean <- df.oex.mean %>%
     startsWith("0 mM", df.oex.mean$H2O2) ~ "CFU_Reference",
     startsWith("10 mM",df.oex.mean$H2O2) ~ "CFU_Target"))
 
-
+# Remove space
 df.oex.mean$H2O2 <- gsub(" ", "", df.oex.mean$H2O2)
 
 # Pivot the table
@@ -83,18 +78,24 @@ df.oex <- df.oex %>% mutate(CFU_Type = case_when(
   startsWith(df.oex$H2O2, "10 mM") ~ "CFU_Target"
 ))
 
+df.oex <- df.oex %>%
+  select(Strain, Replicate, H2O2, MeanCFU) %>% 
+  pivot_wider(names_from = H2O2, values_from = MeanCFU) %>% 
+  mutate(Ratio = `10 mM`/`0 mM`) 
 
-df.oex$Percentage <- 0
+# df.oex$Percentage <- 0
+# 
+# for (i in 1:length(df.oex$Strain)){
+#   if (df.oex[i, 5] == "CFU_Reference"){
+#     df.oex[i, 6] <- df.oex[i, 4] / df.oex[i, 4]
+#     df.oex[i + 1, 6] <- df.oex[i + 1, 4] / df.oex[i, 4]
+#     
+#   }
+# }
 
-for (i in 1:length(df.oex$Strain)){
-  if (df.oex[i, 5] == "CFU_Reference"){
-    df.oex[i, 6] <- df.oex[i, 4] / df.oex[i, 4]
-    df.oex[i + 1, 6] <- df.oex[i + 1, 4] / df.oex[i, 4]
-    
-  }
-}
+df.oex
 
-df.oex <- df.oex %>% filter(H2O2 == "10 mM")
+#df.oex <- df.oex %>% filter(H2O2 == "10 mM")
 df.oex$Strain <- factor(df.oex$Strain, levels = c("SG200", "oexCAT", "T20.LC.1"))
 
 df.oex.mean$H2O2 <- gsub("([0-9]+)(mM)", "\\1 \\2", df.oex.mean$H2O2)
@@ -103,14 +104,14 @@ df.oex.mean$Strain <- factor(df.oex.mean$Strain, levels = c("SG200", "oexCAT", "
 
 # Figure 6.A
 plot.oex.mutant <- ggplot() +
-  geom_point(data = df.oex, aes(x = Strain, y = Percentage, color = Strain), 
+  geom_point(data = df.oex, aes(x = Strain, y = Ratio, color = Strain), 
              size = 3, alpha = 0.95) +
   geom_col(data = df.oex.mean, aes(x = Strain, y = CFU_Ratio, fill = Strain), color = "black", alpha = 0.75)+
   scale_y_continuous(labels = percent, limits = c(0,1), expand = c(0,0), breaks = seq(0, 1, 0.2),
                      minor_breaks = seq(0, 1, 0.1),
                      guide = "axis_minor") +
-  scale_x_discrete(labels = c("SG200" = "<i>U. maydis</i> SG200<br> <br>Initial Strain",
-                              "oexCAT" = "oex<br> <br>UMAG_11067",
+  scale_x_discrete(labels = c("SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain',
+                              "oexCAT" = 'oex<sub><span style="color: white;">2</span></sub><br> <br>UMAG_11067',
                               "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+
   scale_fill_manual(values = wes_palette("Cavalcanti1")) +
   scale_color_manual(values = wes_palette("Cavalcanti1"))+
@@ -132,7 +133,7 @@ plot.oex.mutant <- ggplot() +
 
 # read the data frame with information about USMA infection on maize plants
 
-df <- fread("oexCAT_Maize_Infection_11dpi.csv") # fread from data.table (data.table::fread())
+df <- fread("Figure3/Data_3B_oexCAT_Maize_Infection_11dpi.csv") # fread from data.table (data.table::fread())
 df <- df[, -12]
 
 # create a data frame in which each symptom has a raking from 1 to the highest symptom
@@ -253,8 +254,8 @@ plot.infection <- ggplot() +
            aes(x = Strain, 
                y = Percentage, 
                fill = Symptom), alpha = 0.9, col = "black", width = 0.9) +
-  scale_x_discrete(labels = c("SG200" = "<i>U. maydis</i><br> <br>SG200", 
-                              "oexCAT" = "oex<br> <br>UMAG_11067", 
+  scale_x_discrete(labels = c("SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain', 
+                              "oexCAT" = 'oex<sub><span style="color: white;">2</span></sub><br> <br>UMAG_11067', 
                               "LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain")) +
   scale_y_continuous(labels = scales::percent, expand = c(0,0),
                      breaks = seq(0, 1, 0.2),
@@ -306,10 +307,10 @@ Figure.3 <- plot_grid(plot.oex.mutant, plot.infection,
 #   dir.create(dirSavePlots)
 # }
 
-plot.Figure3 <- paste("Figure3_USMA_Paper.png", sep = "/")
+plot.Figure3 <- paste0("Figure3/Figure_3.tiff")
 
 ggsave(filename = plot.Figure3, plot = Figure.3,
-       width = 24, height = 10, units = "cm", dpi = 300, bg = "white")
+       width = 24, height = 10, units = "cm", dpi = 300, bg = "white", device = "tiff")
 
-getwd()
+
 rm(list = ls())

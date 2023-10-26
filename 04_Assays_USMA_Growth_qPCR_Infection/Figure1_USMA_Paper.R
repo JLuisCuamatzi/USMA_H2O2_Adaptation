@@ -5,7 +5,7 @@
 # load libraries
 libraries <- c("data.table", "dplyr", "tidyr", "ggplot2", "scales",
                "cowplot", "stringr", "Cairo", "grid", "rstatix", 
-               "ggthemes", "ggpubr", "ggtext", "ggh4x")
+               "ggthemes", "ggpubr", "ggtext", "ggh4x", "Cairo")
 
 for (lib in libraries) {
   if (!requireNamespace(lib, quietly = TRUE)) {
@@ -24,7 +24,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
 # Read data of CFU
-df <- fread("Umaydis_ExpEvol_GrowthData.csv")
+df <- fread("Figure1/Data_1A_Umaydis_ExpEvol_GrowthData.csv")
 
 df <- df %>% mutate(
   X.Labs = case_when(
@@ -148,9 +148,9 @@ plot.Figure.1 <- df2plot.1 %>%
   # scale_x_discrete(labels = c("U. maydis SG200" = "<i>U. maydis</i> SG200<br>Initial Strain",
   #                             "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
   #                               "<i>U. maydis</i> SG200<br> <br>H<sub>2</sub>O<sub>2</sub> Resistant <br> <br>(UmH<sub>2</sub>O<sub>2</sub>.R)"))+
-  scale_x_discrete(labels = c("U. maydis SG200" = "<i>U. maydis</i> SG200<br> <br>Initial Strain",
+  scale_x_discrete(labels = c("U. maydis SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain',
                               "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
-                                "UmH<sub>2</sub>O<sub>2</sub>.R<br> <br>Adapted Strain"))+
+                                "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+
 
   theme_classic() +
   
@@ -204,10 +204,8 @@ plot.Figure.1 <- df2plot.1 %>%
 
 
 ## Stability of H2O2 resistance in T20.LC.1
-df.halos <- fread("20230930_Halos_35GEN_H2O2_NO_H2O2.csv")
+df.halos <- fread("Figure1/Data_1B_InhibitionAreaUmAdaptedStrain.csv")
 
-df.halos <- df.halos %>% 
-  filter(Time != "200G+35G H2O2") 
 
 df.halos <- df.halos %>% 
   mutate(x.labs = case_when(
@@ -226,29 +224,27 @@ df.mean.InhZone <- df.halos %>% mutate(InhibitionZone = (pi* (Halo_cm/2)^2 ) ) %
 
 # Statistical test
 
-
+# Paired t-test for UmH2O2.R Treatment 20 vs UmH2O2.R After 7 days w/o H2O2 exposure
+ # Use a paired t-test when you have two sets of related or paired data points. This test is designed to compare the means of two related groups, where each data point in one group has a clear and corresponding match in the other group.
 stat.test <- df.halos  %>% 
   filter(!Time %in% c("Initial" ) )%>% 
   t_test(Halo_cm ~ x.labs, paired = T) %>% add_xy_position(x = "x.labs")
+stat.test$label <- sprintf("%.3f", stat.test$p) # to add three decimals 
+print(stat.test)
 
 
-stat.test$label <- sprintf("%.3f", stat.test$p)
-
-
-
+# unpaired t-test for SG200 vs UmH2O2.R in both moments
+# Use an unpaired (or independent) t-test when you have two separate and unrelated groups of data, and you want to compare the means of these two groups.
 stat.test.2 <- df.halos %>% 
   t_test(Halo_cm ~ Time) %>% add_xy_position(x = "Time")
-
 stat.test.2 <- stat.test.2[-1,]
-
-df.halos <- df.halos %>% filter(Time != "200G+35G H2O2")
-
-
+# add map to print the comparisons in the ggplot2 object
 stat.test$xmin <- stat.test$xmin +1
 stat.test$xmax <- stat.test$xmax +1
 stat.test.2[2,13] <- 1
 stat.test.2[1,14] <- 2
 stat.test.2$label <- stat.test.2$p
+print(stat.test.2)
 
 
 
@@ -268,9 +264,9 @@ plot.T20LC1 <- ggplot()+
     "U. maydis SG200" = "Initial Strain",
     #"UmH2O2R.Col" = expression( "UmH"["2"]*"O"["2"]*".R - Col") ,
     #"UmH2O2R.Col" = "UmH<sub>2</sub>O<sub>2</sub>.R-Col",
-    "UmH2O2R.Col" = "UmH<sub>2</sub>O<sub>2</sub>.R<br> <br>Treatment 20",
+    "UmH2O2R.Col" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain",
     # "UmH2O2R.Col+7d" = expression(atop("UmH"["2"]*"O"["2"]*".R - Col", "+ 7 days"))
-    "UmH2O2R.Col+7d" = "UmH<sub>2</sub>O<sub>2</sub>.R<br> <br>After 7 days <br> <br>w/o H<sub>2</sub>O<sub>2</sub> exposure"  ) )+
+    "UmH2O2R.Col+7d" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>After 7 days <br> <br>w/o H<sub>2</sub>O<sub>2</sub> exposure"  ) )+
   labs(
     x = "\nTimepoints", 
     y = expression( bold("Inhibition Zone by H"["2"]*"O"["2"]*" (cm"^"2"*")")) )+
@@ -297,10 +293,15 @@ plot.T20LC1 <- ggplot()+
 
 plot.F1 <- plot_grid(plot.Figure.1, plot.T20LC1, labels = c("A)", "B)"),align = "h", scale = 0.95)
 
-plot.F1
+# ggsave(filename = "Fig.1.png", plot = plot.F1, units = "in",
+#       width = 8, height = 3.8, dpi = 300, bg = "white")
 
-ggsave(filename = "Fig.1.png", plot = plot.F1, units = "in",
-      width = 8, height = 3.8, dpi = 300, bg = "white")
+
+
+## export as tiff for submission
+ggsave(filename = "Figure1/Figure_1.tiff", plot = plot.F1, units = "in",
+       width = 8, height = 3.8, dpi = 300, bg = "white", device = "tiff")
+
 
 
 
