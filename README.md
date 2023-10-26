@@ -24,8 +24,6 @@ See the `01_Cleaning` subdirectory
 
 See the `02_MappingAndCoveragePlotting` subdirectory
 
-The <b>Figure 3</b> of the main manuscript can be found in `02_MappingAndCoveragePlotting/Figures/Plot_USMA_521_v2_9.Log2Ratio.png`
-
 ### SNP Calling
 
 See the `03_SNP_Calling` subdirectory

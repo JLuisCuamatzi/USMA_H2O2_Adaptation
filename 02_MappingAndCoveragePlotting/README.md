@@ -11,11 +11,9 @@ In the next stage of our pipeline, we did the following:
 <b>02.3.- Computing the Ratio of Normalized Coverage </b>
  - We computed the ratio between normalized coverage in each sample against the initial strain (<i>U. maydis</i> SG200)
  
-<b>02.4.- Mapping genomes from sequenced pools and analysis of coverage</b>
+<b>02.4.- Analysis of coverage with a base-pair resolution at the breakpoint of chr 9 duplication</b>
 
-<b>02.5.- Analysis of coverage with a base-pair resolution at the breakpoint of chr 9 duplication</b>
-
-<b>02.6.- Analysis of Copy Number Variations with CNVnator</b>
+<b>02.5.- Analysis of Copy Number Variations with CNVnator</b>
 
 ### 02.1.- Mapping
 
@@ -90,9 +88,11 @@ Once this script is executed, a directory named `shFiles` will be created. In th
 You can run these `.sh` files with the next command:
 
 ```
-# Example for sample 2021EE01
+# Executing the sh files
 
 sh shFiles/2021EE01_Mapping.sh
+
+sh shFiles/2021EE18_Mapping.sh
 
 ```
 
@@ -139,48 +139,24 @@ Once this script is executed, the `.sh` files will be saved in `shFiles`.
 You can run these `.sh` files with the next command:
 
 ```
-# Example for sample 2021EE01
+# Executing the sh files
 
 sh shFiles/2021EE01_NormCovAndPlotting.sh
+
+sh shFiles/2021EE18_NormCovAndPlotting.sh
 
 ```
 
 ### 02.3.- Computing the Ratio of Normalized Coverage
 
-Finally, the ratio between normalized coverage in each sample against reference sample (<i>U. maydis</i> SG200) was computed in R in the next script:
+Finally, the ratio between normalized coverage in UmH<sub>2</sub>O<sub>2</sub>-R against reference sample (<i>U. maydis</i> SG200) was computed in R in the next script:
 
 `Coverage_Ratio_Log2.R`
 
 The file `02_MappingAndCoveragePlotting/Figures_RatioLog2/Plot_USMA_521_v2_9.Log2Ratio.png` is the <b>Figure 3</b> in the main manuscript.
 
 
-
-### 02.4.- Mapping genomes from sequenced pools and analysis of coverage
-
-The `fastq` of the pools were aligned with the same pipeline
-
-We used the next python scripts: `02_Mapping.py` to generate `sh` files to to process these fastqs
- - For this case, we used the next sample sheet: `USMA_EE_Pools_SampleSheet.csv`
-
-<b>Cleaning and plotting normalized coverage</b>
-
-```
-# To map the reads
-
-python3 02_Mapping.py -c ../USMA_EE_Pools_SampleSheet.csv
-
-# To calculate and plot the normalized coverage
-
-python3 02.1_NormalizedCoverage_and_Plotting.py -c ../USMA_EE_Pools_SampleSheet.csv
-
-# the sh files from both python scripts are in `shFiles/`, and can be executed with:
-
-sh shFiles/2021EE30_Mapping.sh              # example for 2021EE30
-sh shFiles/2021EE30_NormCovAndPlotting.sh   # example for 2021EE30
-
-```
-
-## 02.5.- Analysis of coverage with a base-pair resolution at the breakpoint of chr 9 duplication
+## 02.4.- Analysis of coverage with a base-pair resolution at the breakpoint of chr 9 duplication
 
 An analysis of normalized coverage at base-pair resolution (bpRes) was done to identify the breakpoint of aneuploidy in chromosome 9
 
@@ -206,7 +182,7 @@ The normalized coverage at bp Resolution was plotted with the next Rscript: `Nor
 Additionally, we plotted the genes flankig the breakpoint, and the GC percent in that region.
 
 
-## 02.6.- Analysis of Copy Number Variations with CNVnator
+## 02.5.- Analysis of Copy Number Variations with CNVnator
 
 We conducted an analysis with <b>[CNVnator](https://genome.cshlp.org/content/21/6/974.short)</b> in order to get a more precise size of the chromosomal amplifications detected by analyzing the log<sub>2</sub> ratio
 
