@@ -1,4 +1,5 @@
 # author: jcuamatzi
+# contact: jcuamatzi@liigh.unam.mx
 # date: 2023-10-04
 # Figure 1
 
@@ -41,7 +42,7 @@ df.Figure.1 <- df %>%
                                                                                    "w/o ROS 0 mM",
                                                                                    "w/o ROS 5 mM",
                                                                                    "w/o ROS 60 mM"))
-# remove extrac charactets
+# remove extrac characters
 df.Figure.1$H2O2 <- gsub("w/o ROS ", "", df.Figure.1$H2O2)
 
 # keep only 0 mM, 5 mM and 60 mM
@@ -125,6 +126,18 @@ df2plot.1 <- df2plot.1 %>% mutate(x.labels = case_when(
   endsWith(as.vector(df2plot.1$Line), "C") ~  "U. maydis SG200 H2O2 Resistant (UmH2O2.R)",
   endsWith(as.vector(df2plot.1$Line), "SG200") ~ "U. maydis SG200"))
 
+data2chi.sq <- df2plot.1 %>% 
+  filter(Line %in% c("C", "SG200") ) %>% 
+  select(Condition, H2O2, CFU_Ratio_Mean) %>% 
+  pivot_wider(names_from = H2O2, values_from = CFU_Ratio_Mean)
+
+chisq.test((data2chi.sq[, -1]*100), simulate.p.value = T, B = 1000000)
+
+# p-value between SG200 and UmH2O2-R is: 0.03081
+# This value can change because I'm using 1000000 permutations
+# This p-value indicates that there a statistical differences between the strain SG200 and UmH2O2-R under the measured H2O2 concentrations s
+# The differences in the observed survival rates between U. maydis SG200 and UmH2O2-R were statistically significative (chi-square, p-value = 0.03081)
+
 
 plot.Figure.1 <- df2plot.1 %>% 
   filter(Line %in% c("C", "SG200") ) %>% 
@@ -137,17 +150,6 @@ plot.Figure.1 <- df2plot.1 %>%
                      minor_breaks = seq(0, 1.0, by = 0.1),
                      expand = c(0,0),
                      guide = "axis_minor") +
-  # scale_x_discrete(labels = label_wrap(20))+
-  # scale_x_discrete(labels = c("U. maydis SG200" = expression(paste(italic("U. maydis"), "SG200"))))+
-  # scale_x_discrete(labels = c("U. maydis SG200" = expression( atop( italic("U. maydis"), SG200)),
-  #                             "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
-  #                               expression(italic("U. maydis")*" SG200 H"["2"]*"O"["2"]*" Resistant (UmH"["2"]*"O"["2"]*".R)" )))+
-  # scale_x_discrete(labels = c("U. maydis SG200" = expression(italic("U. maydis ")* "SG200"),
-  #                             "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
-  #                               expression(atop( italic("U. maydis ")*" SG200", atop("H"["2"]*"O"["2"]*" Resistant", "(UmH"["2"]*"O"["2"]*".R)" ) ) )))+
-  # scale_x_discrete(labels = c("U. maydis SG200" = "<i>U. maydis</i> SG200<br>Initial Strain",
-  #                             "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
-  #                               "<i>U. maydis</i> SG200<br> <br>H<sub>2</sub>O<sub>2</sub> Resistant <br> <br>(UmH<sub>2</sub>O<sub>2</sub>.R)"))+
   scale_x_discrete(labels = c("U. maydis SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain',
                               "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
                                 "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+

@@ -24,7 +24,7 @@ rm(list = ls())
 
 ## plot oexcat
 # Read file with data of CFU in oexUMAG_11067
-df.oex <- fread("Figure3/Data_3_UMAG_11067_oex_Mutant.csv")
+df.oex <- fread("Figure3/Data_3A_UMAG_11067_oex_Mutant.csv")
 
 df.oex.mean <- df.oex %>% 
   group_by(Strain, H2O2) %>% 
@@ -83,17 +83,14 @@ df.oex <- df.oex %>%
   pivot_wider(names_from = H2O2, values_from = MeanCFU) %>% 
   mutate(Ratio = `10 mM`/`0 mM`) 
 
-# df.oex$Percentage <- 0
-# 
-# for (i in 1:length(df.oex$Strain)){
-#   if (df.oex[i, 5] == "CFU_Reference"){
-#     df.oex[i, 6] <- df.oex[i, 4] / df.oex[i, 4]
-#     df.oex[i + 1, 6] <- df.oex[i + 1, 4] / df.oex[i, 4]
-#     
-#   }
-# }
+# Statistical test using t-test
 
-df.oex
+stat.test <- df.oex %>% 
+  t_test(formula = Ratio ~ Strain) %>% add_xy_position(x = "Strain")
+
+
+stat.test$label <- sprintf("%.3f", stat.test$p) # to add three decimals 
+print(stat.test)
 
 #df.oex <- df.oex %>% filter(H2O2 == "10 mM")
 df.oex$Strain <- factor(df.oex$Strain, levels = c("SG200", "oexCAT", "T20.LC.1"))
@@ -128,8 +125,10 @@ plot.oex.mutant <- ggplot() +
         axis.text.y = element_text(size = 9, color = "black"),
         
         axis.ticks.length.y = unit(0.2, "cm")
-        );plot.oex.mutant
+        ) +
+  stat_pvalue_manual(data = stat.test );plot.oex.mutant
 
+plot.oex.mutant
 
 # read the data frame with information about USMA infection on maize plants
 
@@ -294,19 +293,13 @@ plot.infection <- ggplot() +
 
 
 Figure.3 <- plot_grid(plot.oex.mutant, plot.infection, 
-                      rel_widths = c(0.75, 1.15), scale = 0.95, labels = c("A)", "B)"))
+                      rel_widths = c(0.75, 1.05), scale = 0.95, labels = c("A)", "B)"))
 
-
+Figure.3
 
 # #### export plots
 
-# 
-# if ( dir.exists(dirSavePlots) ){
-#   print ("Directory already exists!!")
-# } else {
-#   dir.create(dirSavePlots)
-# }
-
+getwd()
 plot.Figure3 <- paste0("Figure3/Figure_3.tiff")
 
 ggsave(filename = plot.Figure3, plot = Figure.3,
