@@ -26,38 +26,32 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Read data of CFU
 df <- fread("Figure1/Data_1A_Umaydis_ExpEvol_GrowthData.csv")
+print(df)
 
-df <- df %>% mutate(
-  X.Labs = case_when(
-    endsWith(df$Line, "SG200") ~ "U. maydis SG200",
-    endsWith(df$Line, "C") ~ "U. maydis SG200 H2O2 resistant (UmH2O2.R)"
-  )
-)
-# keep only CFU
-df <- df[,-5]
 
-# here we get only data for SG200 and treatment 20
-df.Figure.1 <- df %>%  
-  filter(TreatmentNum %in% c("SG200", "Treatment 20")) %>% filter(H2O2 %in% c("0 mM", "5 mM", "60 mM",
-                                                                                   "w/o ROS 0 mM",
-                                                                                   "w/o ROS 5 mM",
-                                                                                   "w/o ROS 60 mM"))
-# remove extrac characters
-df.Figure.1$H2O2 <- gsub("w/o ROS ", "", df.Figure.1$H2O2)
+# For Survival Rate, we only work with CFU. So, here I remove column 4 (data of cell concentration after recovery phase)
+df <- df[,-4]
+
+# The data set provide data of the three evolutionary lines, but we are only working with line C
+df.Figure.1 <- df %>% 
+  filter(Line %in% c("C", "SG200"))
 
 # keep only 0 mM, 5 mM and 60 mM
 df.Figure.1 <- df.Figure.1 %>% 
   filter(H2O2 %in% c("0 mM", "5 mM", "60 mM"))
 
+# I assign categories to estimate the survival rate
+# 0 mM is the reference value
 df.Figure.1 <- df.Figure.1 %>% mutate(CFU_Type =
                                         if_else(H2O2 != "0 mM", "CFU_Target", "CFU_Reference"))
 
-df.Figure.1$H2O2 <- gsub(" ", "", df.Figure.1$H2O2)
+df.Figure.1$H2O2 <- gsub(" ", "", df.Figure.1$H2O2) # remove the blank space in H2O2
+
 
 # Pivot the table 
 df.Figure.1 <- df.Figure.1 %>% 
-  group_by(Condition, TreatmentNum, Line) %>% 
-  summarise(CFU_0mM = CFU[H2O2 == "0mM"],
+  group_by(Line) %>% 
+  reframe(CFU_0mM = CFU[H2O2 == "0mM"],
             CFU_5mM = CFU[H2O2 == "5mM"],
             CFU_60mM = CFU[H2O2 == "60mM"]) %>% 
   ungroup()
@@ -70,7 +64,7 @@ df.Figure.1 <- df.Figure.1 %>%
                 .names = "{.col}_Ratio"))
 
 df.Figure.1 <- df.Figure.1 %>% 
-  select(Condition, TreatmentNum, Line, CFU_0mM_Ratio: CFU_60mM_Ratio) %>% 
+  select(Line, CFU_0mM_Ratio: CFU_60mM_Ratio) %>% 
   pivot_longer(cols = CFU_0mM_Ratio: CFU_60mM_Ratio, names_to = "H2O2", values_to = "CFU_Ratio") %>% 
   setDT()
 
@@ -82,62 +76,41 @@ df.Figure.1$H2O2 <- gsub("_Ratio", "", df.Figure.1$H2O2)
 # Keep just 5 mM and 60 mM
 df.Figure.1 <- df.Figure.1[H2O2 %in% c("5mM", "60mM")]
 
+# Compute the means and sd
 df.Figure.1.Mean <- df.Figure.1 %>% 
-  group_by(Condition, TreatmentNum, H2O2, Line) %>% 
+  group_by(H2O2, Line) %>% 
   summarise(CFU_Ratio_Mean = mean(CFU_Ratio),
             CFU_Ratip_DS = sd(CFU_Ratio)) %>% 
   ungroup()
 
-df.Figure.1 %>% 
-  group_by(Condition, TreatmentNum, H2O2, Line) %>% 
-  summarise(CFU_Ratio_Mean = mean(CFU_Ratio),
-            CFU_Ratip_DS = sd(CFU_Ratio)) %>% 
-  ungroup()
-
+df.Figure.1.Mean
 
 df2plot.1 <- df.Figure.1.Mean %>% 
-  select(Condition, H2O2, Line, CFU_Ratio_Mean)
+  select(H2O2, Line, CFU_Ratio_Mean)
 
-df2plot.1$Line <- factor(df2plot.1$Line, levels = c("SG200", "A", "B", "C", "D", "E", "F"))
-
-df2plot.1 <- df2plot.1 %>% 
-  mutate(Strip.Labs = 
-           case_when(
-             startsWith(as.character(df2plot.1$Line), "SG200") ~ "Initial\nStrain",
-             startsWith(as.character(df2plot.1$Line), "A") ~ "Exposed Pools\n",
-             startsWith(as.character(df2plot.1$Line), "B") ~ "Exposed Pools\n",
-             startsWith(as.character(df2plot.1$Line), "C") ~ "Exposed Pools\n",
-             startsWith(as.character(df2plot.1$Line), "D") ~ "Unexposed Pools\n",
-             startsWith(as.character(df2plot.1$Line), "E") ~ "Unexposed Pools\n",
-             startsWith(as.character(df2plot.1$Line), "F") ~ "Unexposed Pools\n"
-  ))
-
-df2plot.1 <- df2plot.1 %>% 
-  mutate(
-         X.Labs = if_else(Line == "SG200", "", as.vector(Line)))
-
-df2plot.1$Strip.Labs <- factor(as.vector(df2plot.1$Strip.Labs), 
-                             levels = c("Initial\nStrain", "Exposed Pools\n", "Unexposed Pools\n"))
-
-
-df2plot.1$H2O2 <- gsub("([0-9]+)(mM)", "\\1 \\2", df2plot.1$H2O2)
+df2plot.1$Line <- factor(df2plot.1$Line, levels = c("SG200", "C"))
 
 df2plot.1 <- df2plot.1 %>% mutate(x.labels = case_when(
-  endsWith(as.vector(df2plot.1$Line), "C") ~  "U. maydis SG200 H2O2 Resistant (UmH2O2.R)",
+  endsWith(as.vector(df2plot.1$Line), "C") ~  "U. maydis SG200 H2O2 Resistant (UmH2O2-R)",
   endsWith(as.vector(df2plot.1$Line), "SG200") ~ "U. maydis SG200"))
 
+
+### Statistical test with chi-square
+df2plot.1
 data2chi.sq <- df2plot.1 %>% 
   filter(Line %in% c("C", "SG200") ) %>% 
-  select(Condition, H2O2, CFU_Ratio_Mean) %>% 
+  select(Line, H2O2, CFU_Ratio_Mean) %>% 
   pivot_wider(names_from = H2O2, values_from = CFU_Ratio_Mean)
 
-chisq.test((data2chi.sq[, -1]*100), simulate.p.value = T, B = 1000000)
+# Convert the observations to percentage
+data2chi.sq <- (data2chi.sq[, -1])*100
+
+chisq.test(data2chi.sq, simulate.p.value = T, B = 1000000)
 
 # p-value between SG200 and UmH2O2-R is: 0.03081
 # This value can change because I'm using 1000000 permutations
 # This p-value indicates that there a statistical differences between the strain SG200 and UmH2O2-R under the measured H2O2 concentrations s
 # The differences in the observed survival rates between U. maydis SG200 and UmH2O2-R were statistically significative (chi-square, p-value = 0.03081)
-
 
 plot.Figure.1 <- df2plot.1 %>% 
   filter(Line %in% c("C", "SG200") ) %>% 
@@ -151,7 +124,7 @@ plot.Figure.1 <- df2plot.1 %>%
                      expand = c(0,0),
                      guide = "axis_minor") +
   scale_x_discrete(labels = c("U. maydis SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain',
-                              "U. maydis SG200 H2O2 Resistant (UmH2O2.R)" =
+                              "U. maydis SG200 H2O2 Resistant (UmH2O2-R)" =
                                 "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+
 
   theme_classic() +
@@ -194,7 +167,9 @@ plot.Figure.1 <- df2plot.1 %>%
     ggh4x.axis.ticks.length.minor = rel(1)
     ) +
   guides(fill = guide_legend(title = expression(bold( "[H"["2"]*"O"["2"]*"] Shock") ) ),
-         color = "none"); plot.Figure.1
+         color = "none")
+
+plot.Figure.1
 
 
 
@@ -295,10 +270,7 @@ plot.T20LC1 <- ggplot()+
 
 plot.F1 <- plot_grid(plot.Figure.1, plot.T20LC1, labels = c("A)", "B)"),align = "h", scale = 0.95)
 
-# ggsave(filename = "Fig.1.png", plot = plot.F1, units = "in",
-#       width = 8, height = 3.8, dpi = 300, bg = "white")
-
-
+plot.F1
 
 ## export as tiff for submission
 ggsave(filename = "Figure1/Figure_1.tiff", plot = plot.F1, units = "in",

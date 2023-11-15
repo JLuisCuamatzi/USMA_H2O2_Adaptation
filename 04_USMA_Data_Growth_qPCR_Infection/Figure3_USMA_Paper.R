@@ -61,7 +61,7 @@ df.oex.mean <- df.oex.mean %>%
 df.oex.mean$H2O2 <- gsub("CFU_", "", df.oex.mean$H2O2)    # Remove 'CFU_'
 df.oex.mean$H2O2 <- gsub("_Ratio", "", df.oex.mean$H2O2)  # Remove '_Ratio'
 
-df.oex.mean$Strain <- factor(df.oex.mean$Strain, levels = c("SG200", "oexCAT","T20.LC.1"))
+df.oex.mean$Strain <- factor(df.oex.mean$Strain, levels = c("SG200", "oexCAT","UmH2O2-R"))
 
 df.oex <- df.oex %>% group_by(Strain) %>%  arrange(H2O2) %>% ungroup()
 
@@ -83,7 +83,14 @@ df.oex <- df.oex %>%
   pivot_wider(names_from = H2O2, values_from = MeanCFU) %>% 
   mutate(Ratio = `10 mM`/`0 mM`) 
 
-# Statistical test using t-test
+df.oex
+
+#df.oex <- df.oex %>% filter(H2O2 == "10 mM")
+df.oex$Strain <- factor(df.oex$Strain, levels = c("SG200", "oexCAT", "UmH2O2-R"))
+
+df.oex.mean$H2O2 <- gsub("([0-9]+)(mM)", "\\1 \\2", df.oex.mean$H2O2)
+df.oex.mean <- df.oex.mean[H2O2 != "0 mM"]
+df.oex.mean$Strain <- factor(df.oex.mean$Strain, levels = c("SG200", "oexCAT", "UmH2O2-R"))
 
 stat.test <- df.oex %>% 
   t_test(formula = Ratio ~ Strain) %>% add_xy_position(x = "Strain")
@@ -91,13 +98,6 @@ stat.test <- df.oex %>%
 
 stat.test$label <- sprintf("%.3f", stat.test$p) # to add three decimals 
 print(stat.test)
-
-#df.oex <- df.oex %>% filter(H2O2 == "10 mM")
-df.oex$Strain <- factor(df.oex$Strain, levels = c("SG200", "oexCAT", "T20.LC.1"))
-
-df.oex.mean$H2O2 <- gsub("([0-9]+)(mM)", "\\1 \\2", df.oex.mean$H2O2)
-df.oex.mean <- df.oex.mean[H2O2 != "0 mM"]
-df.oex.mean$Strain <- factor(df.oex.mean$Strain, levels = c("SG200", "oexCAT", "T20.LC.1"))
 
 # Figure 6.A
 plot.oex.mutant <- ggplot() +
@@ -109,7 +109,7 @@ plot.oex.mutant <- ggplot() +
                      guide = "axis_minor") +
   scale_x_discrete(labels = c("SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain',
                               "oexCAT" = 'oex<sub><span style="color: white;">2</span></sub><br> <br>UMAG_11067',
-                              "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+
+                              "UmH2O2-R" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain"))+
   scale_fill_manual(values = wes_palette("Cavalcanti1")) +
   scale_color_manual(values = wes_palette("Cavalcanti1"))+
   labs(y = "Surviving Cells", x = "\nStrain")+
@@ -125,10 +125,9 @@ plot.oex.mutant <- ggplot() +
         axis.text.y = element_text(size = 9, color = "black"),
         
         axis.ticks.length.y = unit(0.2, "cm")
-        ) +
+        )+
   stat_pvalue_manual(data = stat.test );plot.oex.mutant
 
-plot.oex.mutant
 
 # read the data frame with information about USMA infection on maize plants
 
@@ -191,22 +190,24 @@ rm(df.3.names, df.3.symp)
 #end_time <- Sys.time()
 #end_time - start_time
 
-
+df.3
 # chi-sq test for SG200 vs oexCAT
-df.3.SG200vsxCAT <- as.matrix(df.3[c(5,4), -1])
-df.3.SG200vsxCAT
-#p.sg200.oexcat <- fisher.test(df.3.SG200vsxCAT, simulate.p.value = TRUE, B = 1000000)  ## p-value = 0.00036
-chisq.test(df.3.SG200vsxCAT, simulate.p.value = TRUE, B = 1000000)   ## p-value = 0.00029
-#p.sg200.oexcat$p.value
+df.3.SG200vsxCAT <- as.matrix(df.3[c(3, 5), -1])
 
-# chi-sq test for SG200 vs LC.1
-df.3.SG200vsLC.1 <- as.matrix(df.3[c(4,2), -1])
+# remove column of chlorosis
+chisq.test(df.3.SG200vsxCAT, simulate.p.value = TRUE, B = 1000000)   ## p-value = 0.00029
+#p-value can change cause B = 1000000
+
+# chi-sq test for SG200 vs UmH2O2-R
+df.3.SG200vsLC.1 <- as.matrix(df.3[c(3, 4), -1])
 
 chisq.test(df.3.SG200vsLC.1, simulate.p.value = TRUE, B = 1000000)  ## p-value = 0.005038
-#p.sg200.lc.1$p.value
+#p-value can change cause B = 1000000
 
-# chi-sq test for oexCAT vs LC.1
-df.3.xCATvsLC.1 <- as.matrix(df.3[c(5,2), -1])
+# chi-sq test for oexCAT vs UmH2O2-R
+df.3
+
+df.3.xCATvsLC.1 <- as.matrix(df.3[c(5, 4), -1])
 df.3.xCATvsLC.1 
 
 #chisq.test(df.3.xCATvsLC.1, simulate.p.value = TRUE, B = 1000000)  ## here I removed Chlorosis (0
@@ -225,13 +226,14 @@ df.4 <- df.3 %>%
 #
 df.3.tmp <- df.3[c(5, 4, 2) ,]
 
-counts <- data.frame(Strain = c("SG200","oexCAT", "LC.1"),
+counts <- data.frame(Strain = c("SG200","oexCAT", "UmH2O2-R"),
                      Count = paste("n =", rowSums(df.3.tmp[,-1])))
 
 # colors for plot
 colors <- brewer.pal(7, "YlOrBr")
+df.4
 
-df.4$Strain <- factor(df.4$Strain, levels = c("SG200", "oexCAT", "LC.1"))
+df.4$Strain <- factor(df.4$Strain, levels = c("SG200", "oexCAT", "UmH2O2-R"))
 
 # no H2O and no inoculo
 
@@ -246,7 +248,7 @@ df.4$Symptom <- factor(df.4$Symptom, levels = c("No Symptoms", "Chlorosis", "Lig
                                                 "Small tumors", "Normal tumors", "Heavy tumors stem", 
                                                 "Heavy tumors", "Dead Plant"))
 
-
+df.4
 # Figure 6.B
 plot.infection <- ggplot() + 
   geom_col(data = df.4, 
@@ -255,7 +257,7 @@ plot.infection <- ggplot() +
                fill = Symptom), alpha = 0.9, col = "black", width = 0.9) +
   scale_x_discrete(labels = c("SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain', 
                               "oexCAT" = 'oex<sub><span style="color: white;">2</span></sub><br> <br>UMAG_11067', 
-                              "LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain")) +
+                              "UmH2O2-R" = "UmH<sub>2</sub>O<sub>2</sub>-R<br> <br>Adapted Strain")) +
   scale_y_continuous(labels = scales::percent, expand = c(0,0),
                      breaks = seq(0, 1, 0.2),
                      minor_breaks = seq(0, 1, 0.1),
@@ -293,13 +295,19 @@ plot.infection <- ggplot() +
 
 
 Figure.3 <- plot_grid(plot.oex.mutant, plot.infection, 
-                      rel_widths = c(0.75, 1.05), scale = 0.95, labels = c("A)", "B)"))
+                      rel_widths = c(0.75, 1.15), scale = 0.95, labels = c("A)", "B)"))
 
-Figure.3
+
 
 # #### export plots
 
-getwd()
+# 
+# if ( dir.exists(dirSavePlots) ){
+#   print ("Directory already exists!!")
+# } else {
+#   dir.create(dirSavePlots)
+# }
+
 plot.Figure3 <- paste0("Figure3/Figure_3.tiff")
 
 ggsave(filename = plot.Figure3, plot = Figure.3,

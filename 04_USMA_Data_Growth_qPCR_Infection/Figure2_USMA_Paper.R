@@ -23,9 +23,9 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 df.qpcr <- read_excel(path = "Figure2/Data_2_UMAG_11067_qPCR.xlsx", sheet = "Fold_Change") # read the file
 df.qpcr <- setDT(df.qpcr) # transform to data table
 
+df.qpcr
 
 stat.test <- df.qpcr %>% 
-  filter(Strain != "T20.LB.1") %>% 
   group_by(Condition) %>% 
   t_test(FoldChange ~ Strain) %>% 
   add_xy_position(x = "Strain")
@@ -34,6 +34,7 @@ stat.test <- stat.test[stat.test$Condition != "0 mM",]
 
 stat.test$label <- sprintf("%.3f", stat.test$p)
 
+print(stat.test)
 # Estimate the mean of the fold change
 
 df.mean <- df.qpcr %>% group_by(Strain, Condition) %>% 
@@ -43,25 +44,22 @@ df.mean <- df.qpcr %>% group_by(Strain, Condition) %>%
 df.mean <- df.mean[Condition != "0 mM"]
 
 df.qpcr <- df.qpcr[Condition != "0 mM"]
-df.qpcr <- df.qpcr %>% filter(Strain != "T20.LB.1")
 
 
+df.mean
 
 df.mean <- df.mean %>% mutate(Chr9.LA = case_when(
   startsWith(df.mean$Strain, "SG200") ~ "1X",
-  # startsWith(df.mean$Strain, "T20.LB.1") ~ "2X",
-  startsWith(df.mean$Strain, "T20.LC.1") ~ "3X"
+  startsWith(df.mean$Strain, "UmH2O2-R") ~ "3X"
 ))
+
 
 
 df.qpcr <- df.qpcr %>% mutate(Chr9.LA = case_when(
   startsWith(df.qpcr$Strain, "SG200") ~ "1X",
-  #startsWith(df.qpcr$Strain, "T20.LB.1") ~ "2X",
-  startsWith(df.qpcr$Strain, "T20.LC.1") ~ "3X"
+  startsWith(df.qpcr$Strain, "UmH2O2-R") ~ "3X"
 ))
 
-
-df.mean <- df.mean %>% filter(Strain != "T20.LB.1")
 
 
 Figure.2 <- ggplot()+
@@ -77,7 +75,7 @@ Figure.2 <- ggplot()+
                      guide = "axis_minor",
                      expand = c(0,0))+
   scale_x_discrete(labels = c("SG200" = '<i>U. maydis</i> SG200<sub><span style="color: white;">2</span></sub><br> <br>Initial Strain', 
-                              "T20.LC.1" = "UmH<sub>2</sub>O<sub>2</sub>-R <br> <br>Adapted Strain"))+
+                              "UmH2O2-R" = "UmH<sub>2</sub>O<sub>2</sub>-R <br> <br>Adapted Strain"))+
   labs(x = "Strain", y = "Fold Change in Catalase Gene Expression")+
   ## colors
   scale_fill_manual(values = c( 
