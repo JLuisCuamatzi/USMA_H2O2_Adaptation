@@ -30,7 +30,7 @@ print(df)
 
 
 # For Survival Rate, we only work with CFU. So, here I remove column 4 (data of cell concentration after recovery phase)
-df <- df[,-4]
+df <- df[,-5]
 
 # The data set provide data of the three evolutionary lines, but we are only working with line C
 df.Figure.1 <- df %>% 
@@ -47,14 +47,15 @@ df.Figure.1 <- df.Figure.1 %>% mutate(CFU_Type =
 
 df.Figure.1$H2O2 <- gsub(" ", "", df.Figure.1$H2O2) # remove the blank space in H2O2
 
-
 # Pivot the table 
 df.Figure.1 <- df.Figure.1 %>% 
+  filter(
+    TreatmentNum %in% c("Treatment 20", "SG200")) %>% 
   group_by(Line) %>% 
   reframe(CFU_0mM = CFU[H2O2 == "0mM"],
-            CFU_5mM = CFU[H2O2 == "5mM"],
-            CFU_60mM = CFU[H2O2 == "60mM"]) %>% 
-  ungroup()
+          CFU_5mM = CFU[H2O2 == "5mM"],
+          CFU_60mM = CFU[H2O2 == "60mM"])
+
 
 # estimate the percentage of cfu 
 # we calculate 5 and 60 mM against 0 mM in each group 
@@ -268,15 +269,13 @@ plot.T20LC1 <- ggplot()+
   stat_pvalue_manual(data = stat.test, y.position = c(10.5) );plot.T20LC1
 
 
-plot.F1 <- plot_grid(plot.Figure.1, plot.T20LC1, labels = c("A)", "B)"),align = "h", scale = 0.95)
-
-plot.F1
+plot.F1 <- plot_grid(plot.Figure.1, plot.T20LC1, labels = c("A)", "B)"),align = "h", rel_widths = c(1.05, 0.80)); plot.F1
 
 ## export as tiff for submission
 ggsave(filename = "Figure1/Figure_1.tiff", plot = plot.F1, units = "in",
        width = 8, height = 3.8, dpi = 300, bg = "white", device = "tiff")
 
-
+getwd()
 
 
 rm(list = ls())
