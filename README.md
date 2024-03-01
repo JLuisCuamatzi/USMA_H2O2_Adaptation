@@ -2,7 +2,7 @@
 
 ## Repository created by Jorge Cuamatzi-Flores
 
-Repository with scripts to reproduce the analysis and figures presented in: [Enhanced Oxidative Stress Resistance in Ustilago maydis and Its Implications on the Virulence](https://www.researchgate.net/publication/375481495_Enhanced_Oxidative_Stress_Resistance_in_Ustilago_maydis_and_Its_Implications_on_the_Virulence#fullTextFileContent)
+Repository with scripts to reproduce the analysis and figures presented in: [Enhanced Oxidative Stress Resistance in Ustilago maydis and Its Implications on the Virulence](https://doi.org/10.1007/s10123-024-00489-8)
 
 
 ## Bioinformatic analysis of sequenced genomes
