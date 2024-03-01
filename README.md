@@ -38,7 +38,7 @@ See the subdirectory `04_USMA_Data_Growth_qPCR_Infection`
 
 ### Supplementary Material
 
-See the `03_SNP_Calling` subdirectory
+See the `05_SupplementaryMaterial` subdirectory
 
 
 
